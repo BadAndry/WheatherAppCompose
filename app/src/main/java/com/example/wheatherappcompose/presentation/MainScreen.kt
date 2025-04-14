@@ -1,10 +1,8 @@
-package com.example.wheatherappcompose
+package com.example.wheatherappcompose.presentation
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -15,22 +13,21 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.example.wheatherappcompose.R
+import com.example.wheatherappcompose.data.ItemWeatherModel
 import com.example.wheatherappcompose.ui.theme.BlueLow
 
 
 @Composable
-@Preview
-fun MainScreen() {
+fun MainScreen(currentDay: MutableState<ItemWeatherModel>, onSyncClick: () -> Unit, onSearchClick: () -> Unit) {
     Column(modifier = Modifier.padding(top = 25.dp),
         )
 
@@ -55,35 +52,39 @@ fun MainScreen() {
 
                 ) {
                     Text(modifier = Modifier.padding(top = 8.dp, start = 8.dp),
-                        text = "12/12/2024 13: 50",
+                        text = currentDay.value.time,
                         style = TextStyle(fontSize = 20.sp)
                     )
-                    AsyncImage(model = "https://cdn.weatherapi.com/weather/64x64/day/122.png",
+                    AsyncImage(model = "https:${currentDay.value.icon}",
                         contentDescription = "im2",
                         modifier = Modifier.size(35.dp))
                 }
                 Text(
-                    text = "Moscow",
+                    text = currentDay.value.name,
                     style = TextStyle(fontSize = 35.sp),)
                 Text(
-                    text = "-1°C",
+                    text = if(currentDay.value.currentTemp.isNotEmpty())
+                        currentDay.value.currentTemp.toFloat().toInt().toString()
+                    else "${currentDay.value.maxTemp.toFloat().toInt()}°C" +
+                            "/${currentDay.value.minTemp.toFloat().toInt()}°C",
                     style = TextStyle(fontSize = 55.sp),)
                 Text(
-                    text = "Облачно",
+                    text = currentDay.value.condition,
                     style = TextStyle(fontSize = 24.sp),)
                 Row(Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween)
                 {
                     IconButton(onClick = {
-
+                        onSearchClick.invoke()
                     }) {
                         Icon(painter = painterResource(R.drawable.search),
                             contentDescription = "im3")
                     }
-                    Text(text = "-12°С/-2")
+                    Text(text = "${currentDay.value.maxTemp.toFloat().toInt()}°C" +
+                            "/${currentDay.value.minTemp.toFloat().toInt()}°C")
 
                     IconButton(onClick = {
-
+                        onSyncClick.invoke()
                     }) {
                         Icon(painter = painterResource(R.drawable.refresh),
                             contentDescription = "im3")

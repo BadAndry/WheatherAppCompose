@@ -1,4 +1,4 @@
-package com.example.wheatherappcompose
+package com.example.wheatherappcompose.presentation
 
 import android.content.Context
 import android.os.Bundle
@@ -19,10 +19,12 @@ import androidx.compose.ui.res.painterResource
 import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.example.wheatherappcompose.R
+import com.example.wheatherappcompose.data.ItemWeatherModel
+import com.example.wheatherappcompose.ui.theme.DialogSearch
 import com.example.wheatherappcompose.ui.theme.WheatherAppComposeTheme
 import org.json.JSONObject
 
-const val API_KEY = "13e8cfeba74240938e6101745250704"
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,7 +34,31 @@ class MainActivity : ComponentActivity() {
                 val listday = remember {
                     mutableStateOf(listOf<ItemWeatherModel>())
                 }
-                getData("Moscow", this, listday)
+                val dialogSearch = remember {
+                    mutableStateOf(false)
+                }
+
+                val currentDay = remember {
+                mutableStateOf(
+                    ItemWeatherModel(
+                    "",
+                    "",
+                    "0",
+                    "",
+                    "",
+                    "0",
+                    "0",
+                    ""
+                )
+                )
+            }
+                if (dialogSearch.value){
+                    DialogSearch(dialogSearch, onSubmit = {
+                        getData(it, this, listday, currentDay)
+                    })
+                }
+
+                getData("Moscow", this, listday, currentDay)
                 Image(
                     painter = painterResource(R.drawable.weather),
                     contentDescription = "",
@@ -41,8 +67,13 @@ class MainActivity : ComponentActivity() {
 
                 )
                 Column {
-                    MainScreen()
-                    TabLayout(listday)
+                    MainScreen(currentDay, onSyncClick = {
+                        getData("Moscow", this@MainActivity, listday, currentDay)
+                    },
+                        onSearchClick = {
+                            dialogSearch.value = true
+                        } )
+                    TabLayout(listday, currentDay)
                 }
 
 
@@ -50,8 +81,8 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-private fun getData(city: String, context: Context, dayslist: MutableState<List<ItemWeatherModel>>) {
-val url = "https://api.weatherapi.com/v1/forecast.json?key=13e8cfeba74240938e6101745250704&q=Moscow&days=3&aqi=no&alerts=no"
+private fun getData(city: String, context: Context, dayslist: MutableState<List<ItemWeatherModel>>, currentDay: MutableState<ItemWeatherModel>) {
+val url = "https://api.weatherapi.com/v1/forecast.json?key=13e8cfeba74240938e6101745250704&q=$city&days=3&aqi=no&alerts=no"
     val queue = Volley.newRequestQueue(context)
     val stringRequest = StringRequest(
         Request.Method.GET,
@@ -59,6 +90,7 @@ val url = "https://api.weatherapi.com/v1/forecast.json?key=13e8cfeba74240938e610
     {
         response ->
         val list = getWeatherByDays(response)
+        currentDay.value = list[0]
         dayslist.value = list
     },
     {
