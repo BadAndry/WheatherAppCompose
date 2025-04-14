@@ -22,7 +22,6 @@ import com.android.volley.toolbox.Volley
 import com.example.wheatherappcompose.ui.theme.WheatherAppComposeTheme
 import org.json.JSONObject
 
-const val API_KEY = "13e8cfeba74240938e6101745250704"
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
